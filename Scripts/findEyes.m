@@ -1,4 +1,4 @@
-function [e1, e2] = getEyeCord (img)
+function [e1, e2] = findEyes (img)
 
 faceDetector = vision.CascadeObjectDetector;
 bboxesFace = step(faceDetector, img);

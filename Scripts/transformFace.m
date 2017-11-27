@@ -1,4 +1,4 @@
-function [ triangle ] = transform_face( picture, left_eye_x, left_eye_y, right_eye_x, right_eye_y, mouth_x, mouth_y )
+function [ triangle ] = transformFace( picture, left_eye_x, left_eye_y, right_eye_x, right_eye_y, mouth_x, mouth_y )
 %TRANSFORM Summary of this function goes here
 %   Detailed explanation goes here
 

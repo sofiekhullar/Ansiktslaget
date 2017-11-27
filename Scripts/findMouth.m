@@ -1,4 +1,4 @@
-function [ mouthPosition ] = findMouth( img )
+function [mouthPosition] = findMouth( img )
 
 % Viola jones detectors for Face and Eyes
 faceDetector = vision.CascadeObjectDetector;
@@ -39,6 +39,7 @@ centroid = mean([x(logical(mouthDone)), y(logical(mouthDone))]);
 %figure
 
 mouthPosition = [(centroid(1) + bboxesEye(1,1)) (centroid(2) + bboxesEye(1,4)+ bboxesEye(1,2) )];
+
 %markerFace = insertMarker(img,[mouthPosition(1) mouthPosition(2)]);
 %imshow(markerFace)
 
