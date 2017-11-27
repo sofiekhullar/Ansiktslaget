@@ -48,3 +48,15 @@ test = tmp(bboxesEye(1,2):(bboxesEye(1,2) + bboxesEye(1,4)), bboxesEye(1,1):(bbo
 bw = im2bw(test);
 imshow(bw);
 
+%% Test norm images
+
+size = length(newImageArray{1})
+sum_image = zeros(size, size);
+
+for i = 1:length(newImageArray)
+    
+    sum_image = sum_image + mat2gray(newImageArray{i});
+end
+
+figure;
+imshow(mat2gray(sum_image))

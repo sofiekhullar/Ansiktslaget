@@ -1,4 +1,4 @@
-function [ triangle ] = transformFace( picture, left_eye_x, left_eye_y, right_eye_x, right_eye_y, mouth_x, mouth_y )
+function [ triangle ] = transformFace( picture, left_eye_in, right_eye_in, mouth_in)
 %TRANSFORM Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -9,12 +9,12 @@ triangle = picture;
 origo.x = (width / 2);
 origo.y = (height / 2);
 
-left_eye.x = left_eye_x;
-left_eye.y = left_eye_y;
-right_eye.x = right_eye_x;
-right_eye.y = right_eye_y;
-mouth.x = mouth_x;
-mouth.y = mouth_y;
+left_eye.x = left_eye_in(1,1);
+left_eye.y = left_eye_in(1,2);
+right_eye.x = right_eye_in(1,1);
+right_eye.y = right_eye_in(1,2);
+mouth.x = mouth_in(1,1);
+mouth.y = mouth_in(1,2);
 
 % Find middle
 left_eye_mouth_middle.x = (left_eye.x + mouth.x) / 2;
@@ -142,16 +142,6 @@ diff = sqrt((left_eye.x - right_eye.x)^2 + (left_eye.y - right_eye.y)^2);
 change = goal_diff / diff;
 
 triangle = imresize(triangle,change);
-
-% figure;
-% imshow(triangle)
-% hold on;
-% plot(left_eye.x, left_eye.y,'--o','LineWidth',2);
-% plot(right_eye.x , right_eye.y,'--o','LineWidth',2);
-% plot(mouth.x, mouth.y,'--o','LineWidth',2);
-% plot(middle.x, middle.y,'--x','LineWidth',2);
-% grid on;
-% hold off;
 
 % Crop image
 h = goal_diff*2;
