@@ -47,7 +47,6 @@ imshow(mat2gray(norm_image))
 
 %%
 gammaArray = {}; 
-psiArray = {};
 
 M = length(newImageArray);
 norm_image_vector = norm_image(:);
@@ -63,31 +62,25 @@ M2 = length(gammaArray{1,1});
 sumVector = zeros(M2, 1);
 
 % step 3 - Find the average face vector psi
-for i = 1:M
-    tmpVector = gammaArray{1,i};
-    for j = 1:M2
-        sumVector(j,1) = (sumVector(j,1) + tmpVector(j,1));
-    end
-end
-psi = 1/M .* sumVector;
+psi = 1/M .* norm_image_vector;
 
-% step 4 - Subtract the mean face from each face vector 
+% step 4 - Subtract the mean fae from each face vector 
+phi = {};
 for i = 1:M
-    phi{i} = gammaArray{1,i} - norm_image_vector;
+    phi{i} = gammaArray{1,i} - psi;
 end
 
 %% step 5 - Find the Covariance matrix C
-% A = [phi1, phi2, ....]
-% C = A A^T
-% A is of size n x M
-% C is a N^2 times N^2 
-
 A = cell2mat(phi);
 AT = A.'; 
 C = AT*A;
 
-%C = cov(A, AT);
+%%
+vi = C(:,14);
+ui = A*vi;
+uiR = reshape(ui, [261,261]);
 
+imshow(uiR)
 %% Call function tnm034 
 
 id = tnm034(imageArray{1})
