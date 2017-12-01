@@ -11,9 +11,9 @@ for i=1:nfiles
    imageArray{i} = currentimage;
 end
 
-%% Calc new image array
-newnfiles = 0;
-newImageArray = {1,nfiles};
+% Calc new image array
+number_of_files = 0;
+raw_images = {1,nfiles};
 
 for i=1:nfiles
     currentImage = imageArray{i};
@@ -24,64 +24,50 @@ for i=1:nfiles
         continue;
     end
     
-    newnfiles = newnfiles + 1;
+    number_of_files = number_of_files + 1;
     
     currentImage = transformFace(currentImage, leftEye, rightEye, mouth);
     newImage = rgb2gray(currentImage);
     
-    newImageArray{newnfiles} = newImage;
+    raw_images{number_of_files} = newImage;
 end 
 
-clearvars -except newImageArray newnfiles
-
-%% Norm Image
-size = length(newImageArray{1});
-norm_image = zeros(size, size);
-
-for i = 1:length(newImageArray)
-    norm_image = norm_image + mat2gray(newImageArray{i});
-end
-
-norm_image = uint8(mat2gray(norm_image) * 255);
-
-%figure;
-%imshow(norm_image)
-
-clearvars -except newImageArray newnfiles norm_image size
+clearvars -except raw_images number_of_files
 
 %%
-M = length(newImageArray);
-norm_image_vector = norm_image(:);
+clc
+temp = zeros(length(raw_images{1})^2, 1);
 
-gammaArray = {M};
+raw_vector = zeros(length(raw_images{1})^2, number_of_files);
 
-% step 2 - Represent image as vector
-for i = 1:M
-    gammaArray{i} = newImageArray{i}(:);
+for i = 1:number_of_files
+    raw_vector(:,i) = raw_images{i}(:);
+    temp = temp + raw_vector(:,i);
 end
 
-% step 3 - Find the average face vector psi
-psi = norm_image_vector;
+psi = temp / number_of_files;
+phi = raw_vector - psi;
 
-% step 4 - Subtract the mean fae from each face vector 
-phi = {M};
+A = phi;
+C = A'*A;
 
-for i = 1:M
-    phi{i} = double(gammaArray{1,i}) - double(psi);
+[eig_mat, eig_vals] = eig(C);
+
+eig_vals_vect = diag(eig_vals);
+[sorted_eig_vals, eig_indices] = sort(eig_vals_vect,'descend');
+sorted_eig_mat = zeros(number_of_files);
+
+for i=1:number_of_files
+    sorted_eig_mat(:,i) = eig_mat(:,eig_indices(i));
 end
 
-%% step 5 - Find the Covariance matrix C
-A = cell2mat(phi);
-AT = A'; 
-C = AT*A;
+eig_faces = (A*sorted_eig_mat);
 
-%%
-vi = C(:,1);
-ui = A*vi;
-uiR = reshape(ui, [261,261]);
-
+% Show
+nr = 1;
 figure;
-imshow(uiR)
+imshow(mat2gray(reshape(Eig_faces(:,nr), [261,261])));
+
 %% Call function tnm034 
 
 id = tnm034(imageArray{1})
