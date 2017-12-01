@@ -1,0 +1,16 @@
+function [img] = findFace(i)
+
+ ycbcr = rgb2ycbcr(i);
+ ycbcr = im2double(ycbcr);
+ y = ycbcr(:,:,1);
+ cb = ycbcr(:,:,2);
+ cr = ycbcr(:,:,3);
+
+ hsv = rgb2hsv(i);
+ hsv = im2double(i);
+ h = hsv(:,:,1);
+ s = hsv(:,:,2);
+ v = hsv(:,:,3);
+   
+ imshow(skin);
+end

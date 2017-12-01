@@ -59,8 +59,8 @@ back = back.^2;
 m = mean(mean(back));
 BW1 = im2bw(back,0.34-m^2);
 
-eye1 = BW1(:,1:x/2);
-eye2 = BW1(:,x/2:x);
+eye1 = BW1(:,1:floor(x/2));
+eye2 = BW1(:,floor(x/2):x);
 
 [Y, X] = ndgrid(1:size(eye1, 1), 1:size(eye1, 2));
 e1 = mean([X(logical(eye1)), Y(logical(eye1))]);
