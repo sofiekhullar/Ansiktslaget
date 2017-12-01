@@ -1,4 +1,5 @@
 %% Read in data from DB1 and save in imageArray
+clear clc
 DBdir = '../Images/DB1/';
 imagefiles = dir(strcat(DBdir,'*.jpg')); 
 nfiles = length(imagefiles);
@@ -31,10 +32,9 @@ for i=1:nfiles
     newImageArray{newnfiles} = newImage;
 end 
 
-clearvars -except newImageArray newnfiles imageArray nfiles
+clearvars -except newImageArray newnfiles
 
 %% Norm Image
-clc
 size = length(newImageArray{1});
 norm_image = zeros(size, size);
 
@@ -42,44 +42,45 @@ for i = 1:length(newImageArray)
     norm_image = norm_image + mat2gray(newImageArray{i});
 end
 
-figure;
-imshow(mat2gray(norm_image))
+norm_image = uint8(mat2gray(norm_image) * 255);
+
+%figure;
+%imshow(norm_image)
+
+clearvars -except newImageArray newnfiles norm_image size
 
 %%
-gammaArray = {}; 
-
 M = length(newImageArray);
 norm_image_vector = norm_image(:);
 
+gammaArray = {M};
+
 % step 2 - Represent image as vector
 for i = 1:M
-    currentTestImg = newImageArray{i};
-    currentTestImg = im2double(currentTestImg);
-    gammaArray{i} = currentTestImg(:);
+    gammaArray{i} = newImageArray{i}(:);
 end
 
-M2 = length(gammaArray{1,1});
-sumVector = zeros(M2, 1);
-
 % step 3 - Find the average face vector psi
-psi = 1/M .* norm_image_vector;
+psi = norm_image_vector;
 
 % step 4 - Subtract the mean fae from each face vector 
-phi = {};
+phi = {M};
+
 for i = 1:M
-    phi{i} = gammaArray{1,i} - psi;
+    phi{i} = double(gammaArray{1,i}) - double(psi);
 end
 
 %% step 5 - Find the Covariance matrix C
 A = cell2mat(phi);
-AT = A.'; 
+AT = A'; 
 C = AT*A;
 
 %%
-vi = C(:,14);
+vi = C(:,1);
 ui = A*vi;
 uiR = reshape(ui, [261,261]);
 
+figure;
 imshow(uiR)
 %% Call function tnm034 
 
