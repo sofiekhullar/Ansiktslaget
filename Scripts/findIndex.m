@@ -7,7 +7,7 @@ function [min_ind] = findIndex(w, x)
 
     for i = 1:n_images
         
-        dist = sqrt(sum((w(:,i) - x).^2))
+        dist = sqrt(sum((w(:,i) - x).^2));
         
         if  dist < min_dist
             min_dist = dist;

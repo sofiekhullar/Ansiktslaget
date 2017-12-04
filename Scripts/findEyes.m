@@ -1,9 +1,16 @@
-function [e1, e2] = findEyes (img)
+function [e1, e2] = findEyes (input)
 
-faceDetector = vision.CascadeObjectDetector;
-bboxesFace = step(faceDetector, img);
-test = img(bboxesFace(1,2):(bboxesFace(1,2) + floor((bboxesFace(1,4)/1.5))), bboxesFace(1,1):(bboxesFace(1,1) + bboxesFace(1,3)),:);
+face = findFace(input);
+masked = bsxfun( @times, input, cast(face, class(input)));
 
+[top,bottom,left, right] = cropImage(masked);
+
+img = masked(top:bottom,left:right,:);
+
+[y_, x, ~] = size(img);
+img = img(floor(y_/10):floor(3*y_/5),:,:);
+
+test = img;
 ycbcr = rgb2ycbcr(test);
 ycbcr = im2double(ycbcr);
 lab = rgb2lab(test);
@@ -59,8 +66,13 @@ back = back.^2;
 m = mean(mean(back));
 BW1 = im2bw(back,0.34-m^2);
 
-eye1 = BW1(:,1:x/2);
-eye2 = BW1(:,x/2:x);
+BW1 = bwmorph(BW1, 'thicken', 8);
+BW1 = bwmorph(BW1, 'bridge', 5);
+BW1 = bwareafilt(BW1,2);
+BW1 = bwfill(BW1, 'holes');
+
+eye1 = BW1(:,1:floor(x/2));
+eye2 = BW1(:,floor(x/2):x);
 
 [Y, X] = ndgrid(1:size(eye1, 1), 1:size(eye1, 2));
 e1 = mean([X(logical(eye1)), Y(logical(eye1))]);
@@ -68,10 +80,11 @@ e1 = mean([X(logical(eye1)), Y(logical(eye1))]);
 [Y, X] = ndgrid(1:size(eye2, 1), 1:size(eye2, 2));
 e2 = mean([X(logical(eye2)), Y(logical(eye2))]);
 
-e1(1,1) = e1(1,1) + bboxesFace(1,1);
-e1(1,2) = e1(1,2) + bboxesFace(1,2);
+e1(1,1) = e1(1,1)+left;
+e1(1,2) = e1(1,2)+top+floor(y_/10);
 
-e2(1,1) = e2(1,1) + bboxesFace(1,1) + x/2;
-e2(1,2) = e2(1,2) + bboxesFace(1,2);
+e2(1,1) = e2(1,1)+x/2+left;
+e2(1,2) = e2(1,2)+top+floor(y_/10);
 
+end
 
