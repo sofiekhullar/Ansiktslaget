@@ -81,25 +81,23 @@ C = AT*A;
 %[M, I] = max(max(eigenValues));
  %eigenfaces.image{a} = eigenfaces.image{a}./norm(eigenfaces.image{a},2);
 
- vi_array = zeros(M,M);
- ui_array = zeros(N2, M);
+k = 6;
+v = zeros(M,k);
+u = zeros(N2, k);
  
 % To sort the eigenvectors with the eigenvalues
 [L, ind] = sort(diag(eigenValues),'descend');
 sortedEigenVectors = eigenVectors(:, ind);
- 
-for i = 1:M 
-   vi_array(:,i) = sortedEigenVectors(:, i);
-   ui_array(:,i) = A * vi_array(:,i);
-end
 
-k = 5;
+v = sortedEigenVectors(:,1:k);
+u = A * v;
 
-vectorsK = sortedEigenVectors(:, 1:k);
+% % Finding Weights
+w = A' * u;
 
-% Finding Weights
-wj_array =  A * vectorsK;
-
+abc = u * w';
+I = norm_image_G + reshape(abc(:,1), [261,261]);
+imshow(mat2gray(I));
 %wj = ui'*phitmp;
 %I = norm_image_vector + wj_array' * ui_array;
 
