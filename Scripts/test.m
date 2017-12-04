@@ -10,6 +10,14 @@ for i=1:nfiles
    imageArray{i} = currentimage;
 end
 
+%% Read in input image
+input_img = imread('../Images/DB1/db1_02.jpg');
+[leftEye, rightEye] = findEyes(input_img);
+mouth = findMouth(input_img);
+input_img = transformFace(input_img, leftEye, rightEye, mouth);
+input_img = rgb2gray(input_img);
+
+
 %% Calc new image array
 newnfiles = 0;
 newImageArray = {1,nfiles};
@@ -31,7 +39,7 @@ for i=1:nfiles
     newImageArray{newnfiles} = newImage;
 end 
 
-clearvars -except newImageArray newnfiles imageArray nfiles
+clearvars -except newImageArray newnfiles imageArray nfiles input_img
 
 %% Norm Image
 clc
@@ -52,6 +60,9 @@ M = length(newImageArray);
 norm_image_G = mat2gray(norm_image);
 norm_image_vector = norm_image_G(:);
 
+
+input_img_vector = im2double(input_img(:));
+
 % step 2 - Represent image as vector
 for i = 1:M
     currentTestImg = newImageArray{i};
@@ -71,19 +82,16 @@ for i = 1:M
     phi{i} = gammaArray{1,i} - psi;
 end
 
+input_img_vector = input_img_vector - norm_image_vector;
+
 % step 5 - Find the Covariance matrix C
 A = cell2mat(phi);
-AT = A'; 
-C = AT*A;
+C = A'*A;
 
 [eigenVectors, eigenValues] = eig(C);
 
 %[M, I] = max(max(eigenValues));
- %eigenfaces.image{a} = eigenfaces.image{a}./norm(eigenfaces.image{a},2);
-
 k = 6;
-v = zeros(M,k);
-u = zeros(N2, k);
  
 % To sort the eigenvectors with the eigenvalues
 [L, ind] = sort(diag(eigenValues),'descend');
@@ -92,16 +100,23 @@ sortedEigenVectors = eigenVectors(:, ind);
 v = sortedEigenVectors(:,1:k);
 u = A * v;
 
-% % Finding Weights
-w = A' * u;
+%for input image
+%u_input = input_img_vector * v;
 
-abc = u * w';
-I = norm_image_G + reshape(abc(:,1), [261,261]);
+% % Finding Weights
+w = u' * A;
+
+% for input image
+w_input = u' * input_img_vector;
+
+abc = u * w;
+I = norm_image_G + reshape(abc(:,2), [261,261]);
 imshow(mat2gray(I));
+
+
+
 %wj = ui'*phitmp;
 %I = norm_image_vector + wj_array' * ui_array;
-
-
 
 %vi = sortedEigenVectors(:, 10);
 %ui = A*vi;
