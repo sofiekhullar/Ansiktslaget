@@ -11,63 +11,109 @@ for i=1:nfiles
    imageArray{i} = currentimage;
 end
 
-% Calc new image array
-number_of_files = 0;
-raw_images = {1,nfiles};
+%% Read in input image
+img = imread('../Images/DB1/db1_03.jpg');
 
+%% Call function tnm034 
+tic;
+id = tnm034(imageArray{1})
+toc;
+
+%%
+clear, clc
+img = imread('../Images/DB1/db1_03.jpg');
+% Read in data from DB1 and save in imageArray
+DBdir = '../Images/DB1/';
+imagefiles = dir(strcat(DBdir,'*.jpg')); 
+nfiles = 3; %% ÄNDRA TILL length(imagefiles);
+imageArray = {1,nfiles}; 
+
+% ÄNDRA TILL NFILES
 for i=1:nfiles
-    currentImage = imageArray{i};
+   currentfilename = imagefiles(i).name;
+   currentImage = imread(strcat(DBdir,currentfilename));
+   
     [leftEye, rightEye] = findEyes(currentImage);
     mouth = findMouth(currentImage);
     
-    if (isnan(leftEye(1,1)) || isnan(leftEye(1,2)) || isnan(rightEye(1,1)) || isnan(rightEye(1,2)) || isnan(mouth(1,1)) || isnan(mouth(1,2)) || (i == 12))
-        continue;
-    end
-    
-    number_of_files = number_of_files + 1;
+    % Hittade alla ögon och mun?
     
     currentImage = transformFace(currentImage, leftEye, rightEye, mouth);
-    newImage = rgb2gray(currentImage);
-    
-    raw_images{number_of_files} = newImage;
-end 
+    currentImage = rgb2gray(currentImage);
+   
+    imageArray{i} = currentImage;
+end
 
-clearvars -except raw_images number_of_files
+% Norm Image
+size = length(newImageArray{1});
+norm_image = zeros(size, size);
+
+for i = 1:length(newImageArray)
+    norm_image = norm_image + mat2gray(newImageArray{i});
+end
 
 %%
-clc
-temp = zeros(length(raw_images{1})^2, 1);
 
-raw_vector = zeros(length(raw_images{1})^2, number_of_files);
+% Norm input image
+[leftEye_input, rightEye_input] = findEyes(img);
+mouth_input = findMouth(img);
+input_img = transformFace(img, leftEye_input, rightEye_input, mouth_input);
+input_img = rgb2gray(input_img);
 
-for i = 1:number_of_files
-    raw_vector(:,i) = raw_images{i}(:);
-    temp = temp + raw_vector(:,i);
+% Calc eigenfaces
+gammaArray = {}; 
+
+M = length(newImageArray);
+norm_image_G = mat2gray(norm_image);
+norm_image_vector = norm_image_G(:);
+
+
+input_img_vector = im2double(input_img(:));
+
+% step 2 - Represent image as vector
+for i = 1:M
+    currentTestImg = newImageArray{i};
+    currentTestImg = im2double(currentTestImg);
+    gammaArray{i} = currentTestImg(:);
 end
 
-psi = temp / number_of_files;
-phi = raw_vector - psi;
+N2 = length(gammaArray{1,1});
+sumVector = zeros(N2, 1);
 
-A = phi;
+% step 3 - Find the average face vector psi
+psi = norm_image_vector;
+
+% step 4 - Subtract the mean fae from each face vector 
+phi = {};
+for i = 1:M
+    phi{i} = gammaArray{1,i} - psi;
+end
+
+input_img_vector = input_img_vector - norm_image_vector;
+
+% step 5 - Find the Covariance matrix C
+A = cell2mat(phi);
 C = A'*A;
 
-[eig_mat, eig_vals] = eig(C);
+[eigenVectors, eigenValues] = eig(C);
 
-eig_vals_vect = diag(eig_vals);
-[sorted_eig_vals, eig_indices] = sort(eig_vals_vect,'descend');
-sorted_eig_mat = zeros(number_of_files);
+%[M, I] = max(max(eigenValues));
+k = 6;
+ 
+% To sort the eigenvectors with the eigenvalues
+[L, ind] = sort(diag(eigenValues),'descend');
+sortedEigenVectors = eigenVectors(:, ind);
 
-for i=1:number_of_files
-    sorted_eig_mat(:,i) = eig_mat(:,eig_indices(i));
-end
+v = sortedEigenVectors(:,1:k);
+u = A * v;
 
-eig_faces = (A*sorted_eig_mat);
+%for input image
+%u_input = input_img_vector * v;
 
-% Show
-nr = 1;
-figure;
-imshow(mat2gray(reshape(Eig_faces(:,nr), [261,261])));
+% % Finding Weights
+w = u' * A;
 
-%% Call function tnm034 
+% for input image
+w_input = u' * input_img_vector;
 
-id = tnm034(imageArray{1})
+id = findIndex(w, w_input);
