@@ -1,164 +1,129 @@
-function [ triangle ] = transformFace( picture, left_eye_in, right_eye_in, mouth_in)
-%TRANSFORM Summary of this function goes here
-%   Detailed explanation goes here
+function [ pic ] = transformFace( pic, left_eye, right_eye, mouth)
+%   Centers, rotates, scales and crops the picture. (transformFace( pic,
+%   left_eye, right_eye, mouth))
 
 % Init
-triangle = picture;
-
-[height, width, ~] = size(triangle);
-origo.x = (width / 2);
-origo.y = (height / 2);
-
-left_eye.x = left_eye_in(1,1);
-left_eye.y = left_eye_in(1,2);
-right_eye.x = right_eye_in(1,1);
-right_eye.y = right_eye_in(1,2);
-mouth.x = mouth_in(1,1);
-mouth.y = mouth_in(1,2);
+[height, width, ~] = size(pic);
+origo = [width, height] / 2;
 
 % Find middle
-left_eye_mouth_middle.x = (left_eye.x + mouth.x) / 2;
-left_eye_mouth_middle.y = (left_eye.y + mouth.y) / 2;
-
-right_eye_mouth_middle.x = (right_eye.x + mouth.x) / 2;
-right_eye_mouth_middle.y = (right_eye.y + mouth.y) / 2;
+left_eye_mouth_middle = (left_eye + mouth) / 2;
+right_eye_mouth_middle = (right_eye + mouth) / 2;
 
 dots = 100;
-left_to_right.x = linspace(left_eye_mouth_middle.x, right_eye.x, dots);
-left_to_right.y = linspace(left_eye_mouth_middle.y, right_eye.y, dots);
 
-right_to_left.x = linspace(right_eye_mouth_middle.x, left_eye.x, dots);
-right_to_left.y = linspace(right_eye_mouth_middle.y, left_eye.y, dots);
+left_to_right(1,:) = linspace(left_eye_mouth_middle(1), right_eye(1), dots);
+left_to_right(2,:) = linspace(left_eye_mouth_middle(2), right_eye(2), dots);
 
-diff_min = abs(left_to_right.x-right_to_left.x)+abs(left_to_right.y-right_to_left.y);
+right_to_left(1,:) = linspace(right_eye_mouth_middle(1), left_eye(1), dots);
+right_to_left(2,:) = linspace(right_eye_mouth_middle(2), left_eye(2), dots);
+
+
+diff_min = abs(left_to_right(1,:)-right_to_left(1,:))+abs(left_to_right(2,:)-right_to_left(2,:));
 [~,index_min] = min(diff_min);
 
-middle.x = round((left_to_right.x(index_min)+right_to_left.x(index_min)) / 2);
-middle.y = round((left_to_right.y(index_min)+right_to_left.y(index_min)) / 2);
+middle = round((left_to_right(:,index_min)+right_to_left(:,index_min)) / 2)';
 
 % figure;
 % imshow(triangle)
 % hold on;
-% plot(left_eye.x, left_eye.y,'--o','LineWidth',2);
-% plot(right_eye.x , right_eye.y,'--o','LineWidth',2);
-% plot(mouth.x, mouth.y,'--o','LineWidth',2);
-% plot(middle.x, middle.y,'--x','LineWidth',2);
-% plot(origo.x, origo.y,'--x','LineWidth',2);
+% plot(left_eye(1), left_eye(2),'--o','LineWidth',2);
+% plot(right_eye(1), right_eye(2),'--o','LineWidth',2);
+% plot(mouth(1), mouth(2),'--o','LineWidth',2);
+% plot(middle(1), middle(2),'--x','LineWidth',2);
+% plot(origo(1),origo(2),'--x','LineWidth',2);
 % grid on;
 % hold off;
 
 % Translate image to middle
-diff.x = round(origo.x - middle.x);
-diff.y = round(origo.y - middle.y);
+diff = round(origo - middle);
 
-left_eye.x = left_eye.x + diff.x;
-left_eye.y = left_eye.y + diff.y;
+left_eye = left_eye + diff;
+right_eye = right_eye + diff;
+mouth = mouth + diff;
+middle = middle + diff;
 
-right_eye.x = right_eye.x + diff.x;
-right_eye.y = right_eye.y + diff.y;
-
-mouth.x = mouth.x + diff.x;
-mouth.y = mouth.y + diff.y;
-
-middle.x = middle.x + diff.x;
-middle.y = middle.y + diff.y;
-
-triangle = imtranslate(triangle,[diff.x, diff.y]);
+pic = imtranslate(pic,diff);
 
 % figure;
 % imshow(triangle)
 % hold on;
-% plot(left_eye.x, left_eye.y,'--o','LineWidth',2);
-% plot(right_eye.x , right_eye.y,'--o','LineWidth',2);
-% plot(mouth.x, mouth.y,'--o','LineWidth',2);
-% plot(middle.x, middle.y,'--x','LineWidth',2);
-% plot(origo.x, origo.y,'--x','LineWidth',2);
+% plot(left_eye(1), left_eye(2),'--o','LineWidth',2);
+% plot(right_eye(1), right_eye(2),'--o','LineWidth',2);
+% plot(mouth(1), mouth(2),'--o','LineWidth',2);
+% plot(middle(1), middle(2),'--x','LineWidth',2);
+% plot(origo(1),origo(2),'--x','LineWidth',2);
 % grid on;
 % hold off;
 
 % Rotate
-slope = (left_eye.y - right_eye.y) / (left_eye.x - right_eye.x);
+slope = (left_eye(2) - right_eye(2)) / (left_eye(1) - right_eye(1));
 angle_rad = -atan(slope);
 
-left_eye.x = origo.x + cos(angle_rad) * (left_eye.x - origo.x) - sin(angle_rad) * (left_eye.y - origo.y);
-left_eye.y = origo.y + sin(angle_rad) * (left_eye.x - origo.x) + cos(angle_rad) * (left_eye.y - origo.y);
+left_eye(1) = origo(1) + cos(angle_rad) * (left_eye(1) - origo(1)) - sin(angle_rad) * (left_eye(2) - origo(2));
+left_eye(2) = origo(2) + sin(angle_rad) * (left_eye(1) - origo(1)) + cos(angle_rad) * (left_eye(2) - origo(2));
 
-right_eye.x = origo.x + cos(angle_rad) * (right_eye.x - origo.x) - sin(angle_rad) * (right_eye.y - origo.y);
-right_eye.y = origo.y + sin(angle_rad) * (right_eye.x - origo.x) + cos(angle_rad) * (right_eye.y - origo.y);
+right_eye(1) = origo(1) + cos(angle_rad) * (right_eye(1) - origo(1)) - sin(angle_rad) * (right_eye(2) - origo(2));
+right_eye(2) = origo(2) + sin(angle_rad) * (right_eye(1) - origo(1)) + cos(angle_rad) * (right_eye(2) - origo(2));
 
-mouth.x = origo.x + cos(angle_rad) * (mouth.x - origo.x) - sin(angle_rad) * (mouth.y - origo.y);
-mouth.y = origo.y + sin(angle_rad) * (mouth.x - origo.x) + cos(angle_rad) * (mouth.y - origo.y);
+mouth(1) = origo(1) + cos(angle_rad) * (mouth(1) - origo(1)) - sin(angle_rad) * (mouth(2) - origo(2));
+mouth(2) = origo(2) + sin(angle_rad) * (mouth(1) - origo(1)) + cos(angle_rad) * (mouth(2) - origo(2));
 
 angle_deg = radtodeg(angle_rad);
 
-triangle = imrotate(triangle, -angle_deg, 'bicubic');
+pic = imrotate(pic, -angle_deg, 'bicubic');
 
 % figure;
 % imshow(triangle)
 % hold on;
-% plot(left_eye.x, left_eye.y,'--o','LineWidth',2);
-% plot(right_eye.x , right_eye.y,'--o','LineWidth',2);
-% plot(mouth.x, mouth.y,'--o','LineWidth',2);
-% plot(middle.x, middle.y,'--x','LineWidth',2);
-% plot(origo.x, origo.y,'--x','LineWidth',2);
+% plot(left_eye(1), left_eye(2),'--o','LineWidth',2);
+% plot(right_eye(1), right_eye(2),'--o','LineWidth',2);
+% plot(mouth(1), mouth(2),'--o','LineWidth',2);
+% plot(middle(1), middle(2),'--x','LineWidth',2);
+% plot(origo(1),origo(2),'--x','LineWidth',2);
 % grid on;
 % hold off;
 
 % Translate dots to middle
-[height, width, ~] = size(triangle);
-origo.x = (width / 2);
-origo.y = (height / 2);
+[height, width, ~] = size(pic);
+origo = [width, height] / 2;
 
-diff.x = round(origo.x - middle.x);
-diff.y = round(origo.y - middle.y);
-
-left_eye.x = left_eye.x + diff.x;
-left_eye.y = left_eye.y + diff.y;
-
-right_eye.x = right_eye.x + diff.x;
-right_eye.y = right_eye.y + diff.y;
-
-mouth.x = mouth.x + diff.x;
-mouth.y = mouth.y + diff.y;
-
-middle.x = middle.x + diff.x;
-middle.y = middle.y + diff.y;
+diff = round(origo - middle);
+left_eye = left_eye + diff;
+right_eye = right_eye + diff;
+mouth = mouth + diff;
+middle = middle + diff;
 
 % figure;
 % imshow(triangle)
 % hold on;
-% plot(left_eye.x, left_eye.y,'--o','LineWidth',2);
-% plot(right_eye.x , right_eye.y,'--o','LineWidth',2);
-% plot(mouth.x, mouth.y,'--o','LineWidth',2);
-% plot(middle.x, middle.y,'--x','LineWidth',2);
-% plot(origo.x, origo.y,'--x','LineWidth',2);
+% plot(left_eye(1), left_eye(2),'--o','LineWidth',2);
+% plot(right_eye(1), right_eye(2),'--o','LineWidth',2);
+% plot(mouth(1), mouth(2),'--o','LineWidth',2);
+% plot(middle(1), middle(2),'--x','LineWidth',2);
+% plot(origo(1),origo(2),'--x','LineWidth',2);
 % grid on;
 % hold off;
 
 % Scale
 goal_diff = 130;
 
-diff = sqrt((left_eye.x - right_eye.x)^2 + (left_eye.y - right_eye.y)^2);
+diff = sqrt((left_eye(1) - right_eye(1))^2 + (left_eye(2) - right_eye(2))^2);
 change = goal_diff / diff;
 
-triangle = imresize(triangle,change);
+pic = imresize(pic,change);
 
 % Crop image
 h = goal_diff*2;
 w = goal_diff*2;
 
-[height, width, ~] = size(triangle);
-origo.x = (width / 2);
-origo.y = (height / 2);
+[height, width, ~] = size(pic);
+origo = [width, height] / 2;
 
-triangle = imcrop(triangle,[origo.x-(w/2) origo.y-(h/2) w h]);
+pic = imcrop(pic,[origo(1)-(w/2) origo(2)-(h/2), w, h]);
 
 % figure;
-% imshow(triangle)
-% hold on;
-% plot(origo.x, origo.y,'--x','LineWidth',2);
-% grid on;
-% hold off;
+% imshow(triangle);   
 
 end
 
