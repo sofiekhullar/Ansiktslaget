@@ -44,7 +44,7 @@ end
 img = img(top:bottom,left:right,:);
 
 [y, x, ~] = size(img);
-img = img(1:y/2,:,:);
+img = img(y/4:y/2,:,:);
 
 % faceDetector = vision.CascadeObjectDetector;
 % bboxesFace = step(faceDetector, img);
@@ -116,10 +116,9 @@ e1 = mean([X(logical(eye1)), Y(logical(eye1))]);
 e2 = mean([X(logical(eye2)), Y(logical(eye2))]);
 
 e1(1,1) = e1(1,1)+left;
-e1(1,2) = e1(1,2)+top;
+e1(1,2) = e1(1,2)+top+(t/4;
 
 e2(1,1) = e2(1,1)+x/2+left;
-e2(1,2) = e2(1,2)+top;
+e2(1,2) = e2(1,2)+top+y/4;
 
-end
 

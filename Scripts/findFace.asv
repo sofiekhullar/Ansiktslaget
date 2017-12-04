@@ -1,16 +1,20 @@
-function [img] = findFace(i)
+function [a] = findFace(i)
 
- ycbcr = rgb2ycbcr(i);
- ycbcr = im2double(ycbcr);
- y = ycbcr(:,:,1);
- cb = ycbcr(:,:,2);
- cr = ycbcr(:,:,3);
+ erode = strel('diamond',22);
+ dilate = strel('diamond',50);
+ dilateSmall = strel('diamond',3);
 
- hsv = rgb2hsv(i);
- hsv = im2double(i);
- h = hsv(:,:,1);
- s = hsv(:,:,2);
- v = hsv(:,:,3);
-   
- imshow(skin);
+ i = imgaussfilt(i,10);
+ h = fspecial('motion', 50, 45);
+ i = imfilter(i, h);
+ 
+ lab = rgb2lab(i);
+ a = lab(:,:,2)/100;
+ m = abs(mean(mean(a)))
+ a = im2bw(a, 1.*m);
+ a = imerode(a, erode);
+ a = imfill(a,'holes');
+%  a = imdilate(a, dilate);
+%  a = imdilate(a, dilateSmall);
+ a = bwareafilt(a,1);
 end
