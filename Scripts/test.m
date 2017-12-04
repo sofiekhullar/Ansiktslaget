@@ -14,4 +14,6 @@ end
 input_img = imread('../Images/DB0/db0_3.jpg');
 
 %% Call function tnm034 
-id = tnm034(imageArray{2})
+tic
+id = tnm034(imageArray{4})
+toc

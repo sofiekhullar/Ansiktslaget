@@ -34,7 +34,6 @@ for i=1:nfiles
 end 
 
 % Norm Image
-clc
 size = length(newImageArray{1});
 norm_image = zeros(size, size);
 
@@ -48,31 +47,28 @@ mouth_input = findMouth(img);
 input_img = transformFace(img, leftEye_input, rightEye_input, mouth_input);
 input_img = rgb2gray(input_img);
 
-% Calc eigenfaces
-gammaArray = {}; 
-
+% Calculate eigenfaces
+% step 1 - Convert image to vector
 M = length(newImageArray);
 norm_image_G = mat2gray(norm_image);
 norm_image_vector = norm_image_G(:);
 
-
+% change input image
 input_img_vector = im2double(input_img(:));
 
 % step 2 - Represent image as vector
+gammaArray = cell(1, M);
 for i = 1:M
     currentTestImg = newImageArray{i};
     currentTestImg = im2double(currentTestImg);
     gammaArray{i} = currentTestImg(:);
 end
 
-N2 = length(gammaArray{1,1});
-sumVector = zeros(N2, 1);
-
 % step 3 - Find the average face vector psi
 psi = norm_image_vector;
 
 % step 4 - Subtract the mean fae from each face vector 
-phi = {};
+phi = cell(1,M);
 for i = 1:M
     phi{i} = gammaArray{1,i} - psi;
 end
@@ -85,9 +81,8 @@ C = A'*A;
 
 [eigenVectors, eigenValues] = eig(C);
 
-%[M, I] = max(max(eigenValues));
 k = 6;
- 
+
 % To sort the eigenvectors with the eigenvalues
 [L, ind] = sort(diag(eigenValues),'descend');
 sortedEigenVectors = eigenVectors(:, ind);
@@ -95,13 +90,10 @@ sortedEigenVectors = eigenVectors(:, ind);
 v = sortedEigenVectors(:,1:k);
 u = A * v;
 
-%for input image
-%u_input = input_img_vector * v;
-
 % % Finding Weights
 w = u' * A;
 
-% for input image
+% weights for input image
 w_input = u' * input_img_vector;
 
 id = findIndex(w, w_input);
