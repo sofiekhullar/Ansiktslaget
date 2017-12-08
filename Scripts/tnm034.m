@@ -1,4 +1,6 @@
-function [ id ] = tnm034( img, k, threshold)
+function [ id ] = tnm034( img )
+k = 10;
+threshold = 200;
 load('variables.mat');
 % Read in data from DB1 and save in imageArray
 % DBdir = '../Images/DB1/';
@@ -42,7 +44,6 @@ load('variables.mat');
 %     norm_image = norm_image + mat2gray(newImageArray{i});
 % end
 
-
 % Norm input image
 [leftEye_input, rightEye_input] = findEyes(img);
 mouth_input = findMouth(img);
@@ -70,9 +71,6 @@ input_img_vector = im2double(input_img(:));
 %     gammaArray{i} = currentTestImg(:);
 % end
 
-% N2 = length(gammaArray{1,1});
-% sumVector = zeros(N2, 1);
-
 % step 3 - Find the average face vector psi
 % psi = norm_image_vector;
 
@@ -84,11 +82,9 @@ input_img_vector = im2double(input_img(:));
 
 if (size(input_img_vector,1)) ~= (size(norm_image_vector,1))
     id = 0;
-    imshow(input_img);
-    pause;
-    disp('hej');
     return;
 end
+
 size(input_img_vector)
 size(norm_image_vector)
 input_img_vector = input_img_vector - norm_image_vector;
@@ -111,13 +107,10 @@ input_img_vector = input_img_vector - norm_image_vector;
 v = sortedEigenVectors(:,1:k);
 u = A * v;
 
-%for input image
-%u_input = input_img_vector * v;
-
 % % Finding Weights
 w = u' * A;
 
-% for input image
+% weights for input image
 w_input = u' * input_img_vector;
 
 id = findIndex(w, w_input, threshold);
