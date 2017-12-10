@@ -58,11 +58,11 @@ centroid = mean([X(logical(mouthDone)), Y(logical(mouthDone))]);
 
 makerMouth = insertMarker(img, [(centroid(1) + left) (centroid(2) + top + y/2)]);
 
-imshow(face_masked)
+imshow(mask)
 pause;
 imshow(mouthDone)
 pause;
-imshow(makerMouth)
+imshow(maskMouth)
 pause;
 
 %     imshow(test);
