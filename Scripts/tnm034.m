@@ -85,8 +85,6 @@ if (size(input_img_vector,1)) ~= (size(norm_image_vector,1))
     return;
 end
 
-size(input_img_vector)
-size(norm_image_vector)
 input_img_vector = input_img_vector - norm_image_vector;
 
 % imshow(mat2gray(reshape(input_img_vector, [261 261])));

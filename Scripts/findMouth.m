@@ -8,7 +8,7 @@ face_masked = bsxfun( @times, img, cast(face_img, class(img)) );
 % Crop face
 face_masked = face_masked(top:bottom,left:right,:);
 [y, x, ~] = size(face_masked);
-face_cropped = face_masked(y/2 : end,:,:);
+face_cropped = face_masked(floor(y/2) : end,:,:);
 
 % Converting the mouthImg
 mouthImgC = im2double(face_cropped) * 255;

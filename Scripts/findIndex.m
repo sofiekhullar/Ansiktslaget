@@ -1,4 +1,4 @@
-function [min_ind] = findIndex(w, x) 
+function [min_ind] = findIndex(w, x, threshold) 
 
     threshold = 100;
     n_images = size(w,2);
